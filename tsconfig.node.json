@@ -8,8 +8,10 @@
     "playwright.config.*"
   ],
   "compilerOptions": {
+    "experimentalDecorators": true,
     "composite": true,
     "noEmit": true,
+    "strict": false,
     "module": "ESNext",
     "moduleResolution": "Bundler",
     "types": ["node"]

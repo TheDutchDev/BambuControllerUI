@@ -17,37 +17,37 @@ import { ISettings } from "@/interfaces/settings";
 @Component( {
     components: { Button, Label, Input, Card, CardContent, CardDescription, CardHeader, CardFooter, CardTitle}
 })
-class NetworkConfig extends Vue {
+class PrinterStatus extends Vue {
     @Prop()
     private settings : ISettings;
 }
 
-export default toNative(NetworkConfig);
+export default toNative(PrinterStatus);
 
 </script>
 
 <template>
     <Card>
         <CardHeader>
-            <CardTitle>Network Settings</CardTitle>
+            <CardTitle>Printer Settings</CardTitle>
             <CardDescription>
-                Configure your network settings here
+                Configure your Bambu Lab printer here
             </CardDescription>
         </CardHeader>
         <CardContent class="grid gap-6">
             <div class="grid grid-cols-2 gap-4">
                 <div class="grid gap-2">
-                    <Label for="ssid">SSID</Label>
-                    <Input id="ssid" v-model="settings.network.config.ssid" placeholder="eg: MyNetworkSSID" />
+                    <Label for="ip-address">IP Address</Label>
+                    <Input id="ip-address" v-model="settings.printer.config.ipAddress" placeholder="eg: 192.168.1.5" />
                 </div>
                 <div class="grid gap-2">
-                    <Label for="password">Password</Label>
-                    <Input type="password" id="password" v-model="settings.network.config.password" placeholder="eg: MyNetworkPSK" />
+                    <Label for="access-code">Access Code</Label>
+                    <Input id="access-code" v-model="settings.printer.config.accessCode" placeholder="eg: 613g24k1" />
                 </div>
             </div>
             <div class="grid gap-2">
-                <Label for="hostname">Hostname</Label>
-                <Input id="hostname" v-model="settings.network.config.hostName" placeholder="bambu-controller" />
+                <Label for="hostname">Serial Number</Label>
+                <Input id="hostname" v-model="settings.printer.config.serialNumber" placeholder="eg: 00M08B412000062" />
             </div>
         </CardContent>
     </Card>

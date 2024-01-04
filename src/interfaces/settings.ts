@@ -23,6 +23,8 @@ export interface IPrinterSettings {
 
 export interface IPrinterConfig {
     ipAddress : string;
+    accessCode : string;
+    serialNumber : string;
 }
 
 export interface IPrinterStatus {

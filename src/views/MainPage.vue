@@ -1,14 +1,19 @@
 <template>
-    <div class="flex flex-wrap -mx-4 h-full" :class="{ 'justify-center items-center' : loadingProgress < 100 }">
-        <Progress class="w-1/3" :model-value="loadingProgress" v-if="loadingProgress < 100" />
+    <div class="flex flex-wrap -mx-4" :class="{ 'justify-center items-center' : loadingProgress < 100 }">
+        <Progress class="w-1/3" :model-value="loadingProgress" v-if="loadingProgress < 100"/>
         <template v-else>
             <div v-if="settings !== undefined" class="w-full flex flex-row">
-                <div class="sm:w-1/2 md:w-1/4 lg:w-1/4 xl:w-1/4 p-4">
-                    <NetworkConfig @save="onSaveNetwork" :settings="settings" />
-                </div>
-                <div class="sm:w-1/2 md:w-1/4 lg:w-1/4 xl:w-1/4 p-4">
-                    <NetworkConfig :settings="settings" />
-                </div>
+                <Card class="border-none">
+                    <CardContent class="grid gap-6 p-6 flex flex-row">
+                        <NetworkConfig :settings="settings"/>
+                        <PrinterConfig :settings="settings"/>
+<!--                        <PrinterStatus :settings="settings"/>-->
+<!--                        <LedConfig :settings="settings"/>-->
+                    </CardContent>
+                    <CardFooter class="justify-end">
+                        <Button @click="saveSettings">Save All</Button>
+                    </CardFooter>
+                </Card>
             </div>
         </template>
     </div>
@@ -16,30 +21,42 @@
 
 <script lang="ts">
 import axios from 'axios'
-import { Component, Vue } from "vue-facing-decorator";
+import { Component, Vue, toNative } from "vue-facing-decorator";
 import { Button } from '@/components/ui/button';
 import { Progress } from '@/components/ui/progress'
 
+import {
+    Card,
+    CardContent,
+    CardDescription,
+    CardFooter,
+    CardHeader,
+    CardTitle,
+} from '@/components/ui/card'
+
 import NetworkConfig from '@/components/NetworkConfig.vue';
+import PrinterConfig from '@/components/PrinterConfig.vue';
+import PrinterStatus from '@/components/PrinterStatus.vue';
+import LedConfig from '@/components/LedConfig.vue';
 import { ISettings } from "@/interfaces/settings";
 import { useToast } from '@/components/ui/toast/use-toast'
 
 const { toast } = useToast();
 
-const env = await import.meta.env;
+const env = import.meta.env;
 
-@Component({
-    components: {Button, NetworkConfig, Progress}
-})
-export default class MainPage extends Vue {
-    private settings : ISettings;
-    private error : boolean = false;
-    private loadingProgress : number = 0;
-    private loadingTimer : number;
+@Component( {
+    components: { Button, NetworkConfig, Progress, PrinterConfig, PrinterStatus, LedConfig, Card, CardContent, CardDescription, CardHeader, CardFooter, CardTitle }
+} )
+class MainPage extends Vue {
+    public settings: ISettings;
+    public error: boolean = false;
+    public loadingProgress: number = 0;
+    private loadingTimer: number;
 
-    async getSettings( ) {
+    async getSettings() {
         try {
-            let result = await axios.get( `${ this.getOrigin() }/api/info`);
+            let result = await axios.get( `${ this.getOrigin() }/api/info` );
 
             console.log( result );
 
@@ -47,14 +64,12 @@ export default class MainPage extends Vue {
                 this.error = true;
             }
             else {
-                this.loadSettings(result.data);
+                this.loadSettings( result.data );
             }
 
             this.finishLoading();
-        }
-        catch( e ) {
-            //@ts-ignore
-            showToast(
+        } catch( e ) {
+            this.showToast(
                 'Failed to reach controller',
                 'Failed to fetch data from controller, please ensure everything is configured properly!',
                 'destructive'
@@ -62,11 +77,11 @@ export default class MainPage extends Vue {
         }
     }
 
-    private loadSettings(settings : ISettings ) {
+    private loadSettings( settings: ISettings ) {
         this.settings = settings;
     }
 
-    private getOrigin( ) : string {
+    private getOrigin(): string {
         console.log( env );
         //@ts-ignore
         if( env.VITE_ENV === "development" )
@@ -79,14 +94,17 @@ export default class MainPage extends Vue {
         return window.location.origin;
     }
 
-    private finishLoading( ) {
+    private finishLoading() {
         clearInterval( this.loadingTimer );
         this.loadingProgress = 100;
     }
 
-    private startLoading( ) {
+    private startLoading() {
         this.loadingProgress = 0;
-        this.loadingTimer = setInterval( ( ) => {
+        this.loadingTimer = setInterval( () => {
+            if( this.loadingProgress > 90 )
+                this.finishLoading();
+
             this.loadingProgress++;
         }, 100 );
     }
@@ -96,18 +114,20 @@ export default class MainPage extends Vue {
         this.getSettings();
     }
 
-    private async onSaveNetwork( ) {
+    async saveSettings() {
+        await this.sendUpdateAsync();
+        this.showToast( 'Settings Updated!', 'Settings have been updated, please reboot the device for the changes to take effect.', '' );
+    }
+
+    private async sendUpdateAsync() {
         await axios.post( `${ this.getOrigin() }/api/update`, this.settings, {
             headers: {
                 'Content-Type': 'application/json'
             },
         } );
-
-        this.showToast( 'Network Settings Updated!', 'Network settings have been updated, please reboot the device for the changes to take effect.', '' );
     }
 
-
-    showToast(title : string, description : string, variant : string) {
+    showToast( title: string, description: string, variant: string ) {
         //@ts-ignore
         toast( {
             title,
@@ -116,5 +136,7 @@ export default class MainPage extends Vue {
         } );
     }
 }
+
+export default toNative(MainPage);
 
 </script>

@@ -1,33 +1,29 @@
 <template>
     <div class="flex flex-col w-screen h-screen">
         <header class="body-font border-b border-primary-300 mb-8 flex flex-row items-center">
-            <div class="flex flex-wrap basis-1/4 p-5 flex-col md:flex-row">
+            <div class="flex flex-wrap basis-1/5 p-5 flex-col md:flex-row">
                 <a class="flex title-font font-medium mb-4 md:mb-0">
                     <h1 class="ml-3 text-4xl">Bambu Controller</h1>
                 </a>
             </div>
-
-            <TooltipProvider>
-                <Tooltip>
-                    <TooltipTrigger as-child>
-                        <Button :disabled="isLoading"
-                                class="flex items-center justify-center p-3 rounded-full w-20 h-20 fixed bottom-5 right-5"
-                                @click="reboot">
-                            <Loader2 class="w-10 h-10 animate-spin" v-if="isLoading"/>
-                            <span class="material-symbols-outlined text-5xl" v-else>
-                                power_settings_new
-                            </span>
-                        </Button>
-                    </TooltipTrigger>
-                    <TooltipContent>
-                        <p>Reboot</p>
-                    </TooltipContent>
-                </Tooltip>
-            </TooltipProvider>
+            <div class="flex flex-wrap basis-1/5 p-5 flex-col justify-evenly md:flex-row">
+                <Button :disabled="isLoading"
+                        class="flex text-l items-center justify-center h-8"
+                        @click="reboot">
+                    <Loader2 class="w-10 h-10 animate-spin" v-if="isLoading"/>
+                    Reboot
+                </Button>
+                <Button :disabled="isLoading"
+                        class="flex text-l items-center justify-center h-8"
+                        @click="reboot">
+                    <Loader2 class="w-10 h-10 animate-spin" v-if="isLoading"/>
+                    Factory Reset
+                </Button>
+            </div>
 
         </header>
-        <RouterView/>
-        <Toaster />
+        <RouterView />
+        <Toaster/>
     </div>
 </template>
 
@@ -42,23 +38,30 @@ import {
     TooltipProvider,
     TooltipTrigger,
 } from '@/components/ui/tooltip'
-import { Component, Vue } from "vue-facing-decorator";
+import { Component, Vue, toNative } from "vue-facing-decorator";
 
 import Toaster from '@/components/ui/toast/Toaster.vue'
 import { useToast } from '@/components/ui/toast/use-toast'
 
 const { toast } = useToast();
 
-const env = await import.meta.env;
+const env = import.meta.env;
 
-@Component( {
+const timeout = (ms : number) =>
+    new Promise(resolve => {
+        setTimeout(resolve, ms)
+    });
+
+@Component({
     components: { Button, Loader2, Toaster, TooltipProvider, Tooltip, TooltipTrigger, TooltipContent }
-} )
-export default class App extends Vue {
-    private isLoading: boolean = false;
-    private ws: WebSocket;
+})
+class App extends Vue {
+
+    public isLoading: boolean = false;
+    public ws: WebSocket | null = null;
     private wsInterval: number | null = null;
-    private shouldReloadOnConnect: boolean = false;
+    public shouldReloadOnConnect: boolean = false;
+    private wsRetryDelayMs : number = 5000;
 
     private getOrigin(): string {
         //@ts-ignore
@@ -69,7 +72,7 @@ export default class App extends Vue {
         if( env.VITE_ENV === "staging" )
             return "bambu-controller";
 
-        return window.location.origin;
+        return window.location.origin.replace( "http://", "" );
     }
 
     async reboot() {
@@ -82,12 +85,16 @@ export default class App extends Vue {
 
     }
 
-    initWebSocket() {
+    async initWebSocket() {
         if( this.shouldReloadOnConnect ) {
             this.showToast(
                 'Controller Offline',
                 'It appears your controller is offline, please wait while we try to re-establish the connection...', ''
             );
+            if( this.wsRetryDelayMs < 60_000 )
+                this.wsRetryDelayMs += 5000;
+
+            await timeout(this.wsRetryDelayMs);
         }
 
         this.ws = new WebSocket( `ws://${ this.getOrigin() }/ws` );
@@ -99,7 +106,7 @@ export default class App extends Vue {
         this.runPingInterval();
     }
 
-    runPingInterval( ) {
+    runPingInterval() {
         if( this.wsInterval !== null )
             clearInterval( this.wsInterval );
 
@@ -117,7 +124,7 @@ export default class App extends Vue {
             window.location.reload();
     }
 
-    onWsMessage( event ) {
+    onWsMessage( event : any ) {
         console.log( 'Received message:', event.data );
     }
 
@@ -127,13 +134,12 @@ export default class App extends Vue {
         this.initWebSocket();
     }
 
-    onWsError( error ) {
+    onWsError( error : any ) {
         console.error( 'WebSocket error:', error );
         this.shouldReloadOnConnect = true;
-        this.initWebSocket();
     }
 
-    showToast(title : string, description : string, variant : string) {
+    showToast( title: string, description: string, variant: string ) {
         //@ts-ignore
         toast( {
             title,
@@ -143,5 +149,6 @@ export default class App extends Vue {
     }
 }
 
+export default toNative(App);
 
 </script>
