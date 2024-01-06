@@ -11,13 +11,13 @@
                         class="flex text-l items-center justify-center h-8"
                         @click="reboot">
                     <Loader2 class="animate-spin" v-if="isLoading"/>
-                    Reboot
+                    <template v-else>Reboot</template>
                 </Button>
                 <Button :disabled="isLoading"
                         class="flex text-l items-center justify-center h-8"
                         @click="reboot">
                     <Loader2 class="animate-spin" v-if="isLoading"/>
-                    Factory Reset
+                    <template v-else>Factory Reset</template>
                 </Button>
             </div>
 
@@ -91,6 +91,7 @@ class App extends Vue {
                 'Controller Offline',
                 'It appears your controller is offline, please wait while we try to re-establish the connection...', ''
             );
+
             if( this.wsRetryDelayMs < 60_000 )
                 this.wsRetryDelayMs += 5000;
 

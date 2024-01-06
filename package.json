@@ -11,6 +11,8 @@
     "type-check": "vue-tsc --build --force"
   },
   "dependencies": {
+    "@jamescoyle/vue-icon": "^0.1.2",
+    "@mdi/js": "^7.4.47",
     "@radix-icons/vue": "^1.0.0",
     "@vueuse/core": "^10.7.1",
     "axios": "^1.6.3",
@@ -28,7 +30,6 @@
   },
   "devDependencies": {
     "@iconify/json": "^2.2.164",
-    "@mdi/font": "^7.4.47",
     "@tsconfig/node18": "^18.2.2",
     "@types/node": "^18.19.3",
     "@vitejs/plugin-vue": "^4.5.2",
