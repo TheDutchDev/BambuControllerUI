@@ -1,5 +1,6 @@
 import { EState } from "@/enums/state";
 import { EMode } from "@/enums/mode";
+import { EPrinterState } from "@/enums/printerState";
 
 export interface ISettings {
     system : ISystemSettings;
@@ -33,6 +34,7 @@ export interface IPrinterStatus {
     ledState: boolean;
     online: boolean;
     finished: boolean;
+    state : EPrinterState;
 }
 
 export interface INetworkSettings {

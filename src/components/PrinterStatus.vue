@@ -13,6 +13,8 @@ import { Label } from '@/components/ui/label';
 import { Input } from '@/components/ui/input';
 import { Component, Prop, Vue, toNative } from "vue-facing-decorator";
 import { ISettings } from "@/interfaces/settings";
+import { EFilamentType } from "@/enums/filamentType";
+import { EPrinterState } from "@/enums/printerState";
 
 @Component( {
     components: { Button, Label, Input, Card, CardContent, CardDescription, CardHeader, CardFooter, CardTitle}
@@ -20,6 +22,47 @@ import { ISettings } from "@/interfaces/settings";
 class PrinterStatus extends Vue {
     @Prop()
     private settings : ISettings;
+
+    public get getActivity() : string {
+        switch( this.settings.printer.status.state)
+        {
+            case EPrinterState.Idle:
+                return "Idle";
+            case EPrinterState.Finished:
+                return "Finished";
+            case EPrinterState.Failed:
+                return "Print Failed";
+            case EPrinterState.Slicing:
+                return "Slicing...";
+            case EPrinterState.Running:
+                return "Printing...";
+            case EPrinterState.Prepare:
+                return "Preparing...";
+            default:
+                return "Unknown";
+        }
+    }
+
+    public toFilamentType(type : EFilamentType) {
+        switch( type ) {
+            case EFilamentType.PLA:
+                return "PLA";
+            case EFilamentType.PETG:
+                return "PETG";
+            case EFilamentType.TPU:
+                return "TPU";
+            case EFilamentType.PA:
+                return "PA";
+            case EFilamentType.PC:
+                return "PC";
+            case EFilamentType.ABS:
+                return "ABS";
+            case EFilamentType.ASA:
+                return "ASA";
+            default:
+                return "Unknown";
+        }
+    }
 }
 
 export default toNative(PrinterStatus);
@@ -29,25 +72,27 @@ export default toNative(PrinterStatus);
 <template>
     <Card>
         <CardHeader>
-            <CardTitle>Printer Settings</CardTitle>
+            <CardTitle>Printer Status</CardTitle>
             <CardDescription>
-                Configure your Bambu Lab printer here
+
             </CardDescription>
         </CardHeader>
         <CardContent class="grid gap-6">
             <div class="grid grid-cols-2 gap-4">
                 <div class="grid gap-2">
-                    <Label for="ip-address">IP Address</Label>
-                    <Input id="ip-address" v-model="settings.printer.config.ipAddress" placeholder="eg: 192.168.1.5" />
+                    <Label>Status</Label>
+                    <Label class="flex justify-start items-center gap-3"><span class="rounded pr-2 pl-2 inline-flex" :style="{ 'background-color': settings.printer.status.online ? '#080' : '#800' }">{{ settings.printer.status.online ? 'Online' : 'Offline' }}</span></Label>
                 </div>
                 <div class="grid gap-2">
-                    <Label for="access-code">Access Code</Label>
-                    <Input id="access-code" v-model="settings.printer.config.accessCode" placeholder="eg: 613g24k1" />
+                    <Label>Current Filament: </Label>
+                    <Label class="flex justify-start items-center gap-3"><span class="rounded pr-2 pl-2 inline-flex" :style="{ 'background-color': `#${settings.printer.filament.status.color}`}">{{ toFilamentType( settings.printer.filament.status.type ) }}</span></Label>
                 </div>
             </div>
-            <div class="grid gap-2">
-                <Label for="hostname">Serial Number</Label>
-                <Input id="hostname" v-model="settings.printer.config.serialNumber" placeholder="eg: 00M08B412000062" />
+            <div class="grid grid-cols-2 gap-4">
+                <div class="grid gap-2">
+                    <Label>Activity</Label>
+                    <Label class="font-normal flex justify-start items-center gap-3">{{ getActivity }}</Label>
+                </div>
             </div>
         </CardContent>
     </Card>

@@ -42,12 +42,12 @@ export default toNative(PrinterConfig);
                 </div>
                 <div class="grid gap-2">
                     <Label for="access-code">Access Code</Label>
-                    <Input id="access-code" v-model="settings.printer.config.accessCode" placeholder="eg: 613g24k1" />
+                    <Input id="access-code" :disabled="settings.printer.status.online" v-model="settings.printer.config.accessCode" placeholder="eg: 613g24k1" />
                 </div>
             </div>
             <div class="grid gap-2">
                 <Label for="hostname">Serial Number</Label>
-                <Input id="hostname" v-model="settings.printer.config.serialNumber" placeholder="eg: 00M08B412000062" />
+                <Input id="hostname" :disabled="settings.printer.status.online" v-model="settings.printer.config.serialNumber" placeholder="eg: 00M08B412000062" />
             </div>
         </CardContent>
     </Card>

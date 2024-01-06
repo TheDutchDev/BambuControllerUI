@@ -10,13 +10,13 @@
                 <Button :disabled="isLoading"
                         class="flex text-l items-center justify-center h-8"
                         @click="reboot">
-                    <Loader2 class="w-10 h-10 animate-spin" v-if="isLoading"/>
+                    <Loader2 class="animate-spin" v-if="isLoading"/>
                     Reboot
                 </Button>
                 <Button :disabled="isLoading"
                         class="flex text-l items-center justify-center h-8"
                         @click="reboot">
-                    <Loader2 class="w-10 h-10 animate-spin" v-if="isLoading"/>
+                    <Loader2 class="animate-spin" v-if="isLoading"/>
                     Factory Reset
                 </Button>
             </div>

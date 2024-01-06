@@ -2,17 +2,22 @@
     <div class="flex flex-wrap -mx-4" :class="{ 'justify-center items-center' : loadingProgress < 100 }">
         <Progress class="w-1/3" :model-value="loadingProgress" v-if="loadingProgress < 100"/>
         <template v-else>
-            <div v-if="settings !== undefined" class="w-full flex flex-row">
+            <div v-if="settings !== undefined" class="w-full justify-between flex flex-row">
                 <Card class="border-none">
                     <CardContent class="grid gap-6 p-6 flex flex-row">
                         <NetworkConfig :settings="settings"/>
                         <PrinterConfig :settings="settings"/>
-<!--                        <PrinterStatus :settings="settings"/>-->
 <!--                        <LedConfig :settings="settings"/>-->
                     </CardContent>
                     <CardFooter class="justify-end">
                         <Button @click="saveSettings">Save All</Button>
                     </CardFooter>
+                </Card>
+                <Card class="border-none">
+                    <CardContent class="grid gap-6 p-6 flex flex-row">
+                        <PrinterStatus :settings="settings"/>
+                        <!--                        <LedConfig :settings="settings"/>-->
+                    </CardContent>
                 </Card>
             </div>
         </template>
